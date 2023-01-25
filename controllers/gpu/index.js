@@ -20,7 +20,6 @@ function createGpuProxy(typeName){
         gpuWfsClient,
         function(req,res){
             var params = matchedData(req);
-            params._limit = 5000;
 
             //Si couche du type generateur ou assiette le champ categorie corresponds à suptype
             if (params.categorie) {
@@ -29,7 +28,6 @@ function createGpuProxy(typeName){
                     params = _.omit(params,'categorie');
                 }
             }
-
             req.gpuWfsClient.getFeatures(typeName, params)
                 .then(function(featureCollection) {
                     res.json(featureCollection);
@@ -98,7 +96,9 @@ var communeValidators = legacyValidators.concat([
 ]);
 
 var partitionValidators = legacyValidators.concat([
-    check('partition').optional().isString()
+    check('partition').optional().isString(),
+    check('_limit').optional().isInt(),
+    check('_start').optional().isInt()
 ]);
 
 var categoriesValidators = partitionValidators.concat([
@@ -176,8 +176,8 @@ router.get('/all', cors(corsOptionsGlobal), [
      */
     var params = matchedData(req);
     // Limite de 500 par type
-    params._limit = 500;
-
+    params._limit = 10;
+    params._start = 10;
     /**
      * Préparation d'une série de sous-requêtes
      */
